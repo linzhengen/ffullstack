@@ -1,0 +1,26 @@
+name: template-goreleaser
+
+on:
+  workflow_call:
+    inputs:
+      work-dir:
+        required: true
+        type: string
+    secrets:
+      github-token:
+        required: true
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ inputs.work-dir }}/go.mod
+      - uses: goreleaser/goreleaser-action@v5
+        with:
+          version: latest
+          args: release --clean
+          workdir: ${{ inputs.work-dir }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.github-token }}
