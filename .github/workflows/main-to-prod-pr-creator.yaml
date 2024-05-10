@@ -18,4 +18,13 @@ jobs:
     if: ${{ github.event.pull_request.base.ref == 'prod' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: linzhengen/release-pr-creator@v0.1.6
+      - name: Get github token from GitOpsApp
+        id: git-app-token
+        uses: getsentry/action-github-app-token@v3
+        with:
+          app_id: 895378
+          private_key: ${{ secrets.GIT_OPS_APP_PRIVATE_KEY }}
+      - name: Create PR from main to prod
+        uses: linzhengen/release-pr-creator@v0.1.7
+        with:
+          github-token: ${{ steps.git-app-token.outputs.token }}
