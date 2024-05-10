@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"log"
@@ -28,7 +27,8 @@ func main() {
 		<-sig
 
 		// Shutdown signal with grace period of 30 seconds
-		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second)
+		shutdownCtx, cancelFunc := context.WithTimeout(serverCtx, 30*time.Second)
+		defer cancelFunc()
 
 		go func() {
 			<-shutdownCtx.Done()
@@ -78,7 +78,7 @@ func service() http.Handler {
 		// up to the developer, as some code blocks are preemptible, and others are not.
 		time.Sleep(5 * time.Second)
 
-		if _, err := w.Write([]byte(fmt.Sprintf("all done.\n"))); err != nil {
+		if _, err := w.Write([]byte("all done.\n")); err != nil {
 			log.Printf("failed to write response: %v", err)
 		}
 	})
