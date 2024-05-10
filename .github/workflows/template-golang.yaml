@@ -1,0 +1,60 @@
+name: template-golang
+
+on:
+  workflow_call:
+    inputs:
+      work-dir:
+        required: true
+        type: string
+
+jobs:
+  go-mod:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.work-dir }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ inputs.work-dir }}/go.mod
+          cache-dependency-path: ${{ inputs.work-dir }}/go.sum
+          check-latest: true
+      - name: check go mod
+        run: |
+          go mod tidy
+          git diff --exit-code go.mod
+          git diff --exit-code go.sum
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ inputs.work-dir }}/go.mod
+          cache-dependency-path: ${{ inputs.work-dir }}/go.sum
+          check-latest: true
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: ${{ inputs.work-dir }}
+          args: --timeout=5m
+          skip-pkg-cache: true
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.work-dir }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ inputs.work-dir }}/go.mod
+          cache-dependency-path: ${{ inputs.work-dir }}/go.sum
+          check-latest: true
+      - name: go test
+        run: go test -v -cover ./...
