@@ -2,8 +2,6 @@ name: go-chi-ci
 
 on:
   push:
-    tags:
-      - "v*-go-chi"
     paths:
       - "golang/go-chi/**"
   workflow_dispatch:
